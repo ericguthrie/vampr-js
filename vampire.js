@@ -2,22 +2,21 @@ class Vampire {
   constructor(name, yearConverted) {
     this.name = name;
     this.yearConverted = yearConverted;
-    this.offspring = [];
     this.creator = null;
+    this.offspring = [];
   }
 
   /** Simple tree methods **/
 
   // Adds the vampire as an offspring of this vampire
   addOffspring(vampire) {
-    this.offspring.push(vampire); 
+    this.offspring.push(vampire);
     vampire.creator = this;
-
   }
 
   // Returns the total number of vampires created by that vampire
   get numberOfOffspring() {
-    return this.offspring.length
+    return this.offspring.length;
   }
 
   // Returns the number of vampires away from the original vampire this vampire is
@@ -25,6 +24,7 @@ class Vampire {
     let numberOfVampires = 0;
     let currentVampire = this;
 
+    // climb "up" the tree (using iteration), counting nodes, until no creator is found
     while (currentVampire.creator) {
       currentVampire = currentVampire.creator;
       numberOfVampires++;
@@ -34,13 +34,63 @@ class Vampire {
 
   // Returns true if this vampire is more senior than the other vampire. (Who is closer to the original vampire)
   isMoreSeniorThan(vampire) {
-    
-    if (this.numberOfVampiresFromOriginal < vampire.numberOfVampiresFromOriginal) {
-      return true
+    if (vampire.numberOfVampiresFromOriginal >= this.numberOfVampiresFromOriginal) {
+      return true;
+    } else {
+      return false;
     }
-    else return false
   }
- 
+
+  // Returns the vampire object with that name, or null if no vampire exists with that name
+  vampireWithName(name, level = 0) {
+    console.log("Tree:", Array(level).fill('  ').join(''), this.name);
+    if (this.name === name) {
+      return this;
+    }
+
+    // Depth
+    for (const vamp of this.offspring) {
+      let result = vamp.vampireWithName(name, level + 1);
+      if (result) {
+        return result;
+      }
+    }
+    return null;
+  }
+
+  // Returns the total number of vampires that exist
+  get totalDescendents() {
+
+    let everyone = this.offspring;
+    console.log("Total descendents");
+  
+    for (let i = 0; i < everyone.length; i++) {
+      let vamp = everyone[i];
+      everyone = everyone.concat(vamp.offspring);
+      console.log("Everyone (amount):", everyone.length)
+    }
+
+    return everyone.length;
+
+  }
+
+  // Returns an array of all the vampires that were converted after 1980
+  get allMillennialVampires() {
+    let everyone = this.offspring;
+    let vampiresAfter1980 = [];
+
+    for (let i = 0; i < everyone.length; i++) {
+      let vamp = everyone[i];
+      everyone = everyone.concat(vamp.offspring);
+
+      if (vamp.yearConverted > 1980) {
+        vampiresAfter1980.push(vamp);
+      }
+    }
+
+    return vampiresAfter1980;
+
+  }
 
   /** Stretch **/
 
@@ -54,24 +104,4 @@ class Vampire {
   }
 }
 
-const original = new Vampire();
-const ansel = new Vampire ();
-const bart = new Vampire ();
-const mystery = new Vampire ();
-const elgort = new Vampire ();
-const sarah = new Vampire ();
-const andrew = new Vampire ();
-
-original.addOffspring(ansel);
-original.addOffspring(bart);
-original.addOffspring(mystery);
-
-ansel.addOffspring(elgort);
-ansel.addOffspring(sarah);
-
-elgort.addOffspring(andrew);
-
-console.log(ansel.numberOfVampiresFromOriginal)
-console.log(original.isMoreSeniorThan(elgort));
 module.exports = Vampire;
-
